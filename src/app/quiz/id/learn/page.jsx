@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getQuizById } from '@/lib/quiz-data';
+import { getQuizById } from '../../../../lib/quiz-data';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const SECONDS_PER_SLIDE = 15; // Estimated reading time per slide
