@@ -246,13 +246,13 @@ export default function QuizPage() {
                         </DialogHeader>
                         <p className="mb-2 text-gray-700">{learnQuiz.description}</p>
                         <div className="flex items-center justify-between mb-2">
-                          <p>Slide {slide + 1}/{learnQuiz.learningSlides.length}</p>
+                          <p>Slide {slide + 1}/{learnQuiz.pointsToRead.length}</p>
                           <p>Time remaining: {timer}</p>
                         </div>
-                        <Progress value={(slide / (learnQuiz.learningSlides.length - 1)) * 100} />
+                        <Progress value={(slide / (learnQuiz.pointsToRead.length - 1)) * 100} />
                         <div className="p-4 bg-gray-100 rounded-lg">
-                          <h3 className="font-bold text-lg mb-2">{learnQuiz.learningSlides[slide].title}</h3>
-                          <p>{learnQuiz.learningSlides[slide].content}</p>
+                          <h3 className="font-bold text-lg mb-2">{learnQuiz.title}</h3>
+                          <p>{learnQuiz.pointsToRead[slide]}</p>
                         </div>
                         <div className="flex justify-between mt-2">
                           <Button 
@@ -261,7 +261,7 @@ export default function QuizPage() {
                           >
                             Previous
                           </Button>
-                          {slide < learnQuiz.learningSlides.length - 1 ? (
+                          {slide < learnQuiz.pointsToRead.length - 1 ? (
                             <Button 
                               onClick={() => setSlide(s => s + 1)}
                               disabled={!canProceed}
