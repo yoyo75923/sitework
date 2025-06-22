@@ -303,7 +303,11 @@ Care Instructions: Machine wash cold with like colors, tumble dry low, iron on l
 
         {/* Product Reviews */}
         <div className="mt-12">
-          <ProductReviews productId={product.id} />
+          <ProductReviews 
+            productId={product.id}
+            averageRating={product.rating}
+            totalReviews={product.reviewCount}
+          />
         </div>
       </div>
     </div>
