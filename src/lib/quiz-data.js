@@ -66,11 +66,7 @@ const learningTopics = [
     content: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
     pointsToRead: [
-      'Switching off appliances when not in use saves energy and money.',
-      'LED bulbs use up to 80% less energy than traditional bulbs.',
-      'Unplug chargers and devices when not needed to avoid phantom energy use.',
-      'Washing clothes in cold water saves energy.',
-      'Energy-efficient appliances have a star rating—more stars means more savings.',
+      'Switching off appliances when not in use saves energy and money.'
     ],
     extraInfo: [
       'Many devices continue to draw power even when turned off. Switching them off at the plug can reduce your electricity bill.',
