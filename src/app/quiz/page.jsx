@@ -50,7 +50,7 @@ const categoryColors = {
   'energy': 'bg-yellow-100 text-yellow-800 border-yellow-200'
 }
 
-const SECONDS_PER_SLIDE = 15;
+const SECONDS_PER_SLIDE = 5;
 
 export default function QuizPage() {
   const { user } = useAuth()
