@@ -204,34 +204,23 @@ export default function CustomerDashboard() {
       return
     }
 
-    if (sellForm.images.length < 6) {
-      alert("Please upload at least 6 photos to help buyers see your item clearly and build trust")
-      return
-    }
-
-    if (sellForm.images.length > 8) {
-      alert("Please select maximum 8 images")
-      return
-    }
-
     const newItem = {
-  id: `p2p-${p2pItems.length + 1}`,
-  title: sellForm.title,
-  category: sellForm.category,
-  price: parseFloat(sellForm.price),
-  condition: sellForm.condition, // should be a string like "new", "good", etc.
-  description: sellForm.description,
-  images: [
-    "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&h=300&fit=crop"
-  ],
-  hasReceipt: !!sellForm.receiptImage,
-  location: sellForm.location || "Seattle, WA",
-  views: 0,
-  likes: 0,
-  status: "active",
-  createdAt: new Date().toISOString().split("T")[0],
-}
-
+      id: `p2p-${p2pItems.length + 1}`,
+      title: sellForm.title,
+      category: sellForm.category,
+      price: parseFloat(sellForm.price),
+      condition: sellForm.condition, // should be a string like "new", "good", etc.
+      description: sellForm.description,
+      images: [
+        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&h=300&fit=crop"
+      ],
+      hasReceipt: !!sellForm.receiptImage,
+      location: sellForm.location || "Seattle, WA",
+      views: 0,
+      likes: 0,
+      status: "active",
+      createdAt: new Date().toISOString().split("T")[0],
+    }
 
     setP2pItems((prev) => [newItem, ...prev])
     setShowSellForm(false)
@@ -1004,19 +993,18 @@ export default function CustomerDashboard() {
                           </div>
 
                           <div>
-                            <Label htmlFor="images">Item Photos (6-8 required) *</Label>
+                            <Label htmlFor="images">Item Photos (6-8 recommended)</Label>
                             <div className="mt-1">
-                              <Input type="file" accept="image/*" multiple onChange={handleImageUpload} required />
+                              <Input type="file" accept="image/*" multiple onChange={handleImageUpload} />
                               <p className="text-sm text-gray-500 mt-1">
-                                Upload 6-8 high-quality photos from different angles to help buyers see your item
-                                clearly.
+                                Upload 6-8 high-quality photos from different angles to help buyers see your item clearly.
                               </p>
                               {sellForm.images.length > 0 && (
                                 <div className="mt-2 space-y-1">
                                   <p className="text-sm font-medium">
                                     Uploaded: {sellForm.images.length}/8 images
                                     {sellForm.images.length < 6 && (
-                                      <span className="text-red-600 ml-2">(Minimum 6 required)</span>
+                                      <span className="text-red-600 ml-2">(Minimum 6 recommended)</span>
                                     )}
                                   </p>
                                   {sellForm.images.map((file, index) => (
@@ -1176,3 +1164,4 @@ export default function CustomerDashboard() {
     </div>
   )
 }
+
