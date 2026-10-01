@@ -20,7 +20,7 @@ import {
   RotateCcw,
   Home
 } from "lucide-react"
-import { getQuizById } from "../../../lib/quiz-data"
+import { quizAPI } from "../../../services/api"
 import { useQuiz } from "../../../components/quiz-provider"
 import { useAuth } from "../../../components/auth-provider"
 
@@ -45,19 +45,29 @@ export default function QuizPage() {
   
   const [showExplanation, setShowExplanation] = useState(false)
   const [timeLeft, setTimeLeft] = useState(null)
-
-  const quiz = getQuizById(id)
+  const [quiz, setQuiz] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!quiz) {
-      navigate('/quiz')
-      return
-    }
-
-    if (!currentQuiz || currentQuiz.id !== quiz.id) {
-      startQuiz(quiz)
-    }
-  }, [quiz, currentQuiz, startQuiz, navigate])
+    setLoading(true)
+    quizAPI.getById(id)
+      .then(res => {
+        if (res) {
+          const mapped = {
+            ...res,
+            id: res.legacyId || res._id,
+            totalPoints: res.points || 10,
+            questions: res.questions || []
+          }
+          setQuiz(mapped)
+          startQuiz(mapped)
+        } else {
+          navigate('/quiz')
+        }
+      })
+      .catch(() => navigate('/quiz'))
+      .finally(() => setLoading(false))
+  }, [id, startQuiz, navigate])
 
   useEffect(() => {
     if (!currentQuiz || quizCompleted) return

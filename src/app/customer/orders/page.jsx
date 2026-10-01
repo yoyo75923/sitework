@@ -42,67 +42,31 @@ export default function OrdersPage() {
     return null;
   }
 
-  const orders = [
-    {
-      id: "AMZ-2024-001",
-      items: [
-        {
-          name: "Organic Cotton T-Shirt - Sustainable Fashion",
-          price: 699,
-          quantity: 2,
-          image:
-            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop",
-          packagingType: "reusable",
-        },
-      ],
-      status: "delivered",
-      orderDate: "2024-01-15",
-      deliveryDate: "2024-01-18",
-      total: 1398,
-      trackingNumber: "1Z999AA1234567890",
-      canCancel: false,
-      canReturn: true,
-    },
-    {
-      id: "AMZ-2024-002",
-      items: [
-        {
-          name: "Bamboo Fiber Phone Case - Biodegradable",
-          price: 300,
-          quantity: 1,
-          image:
-            "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=100&h=100&fit=crop",
-          packagingType: "biodegradable",
-        },
-      ],
-      status: "delivered",
-      orderDate: "2024-01-20",
-      deliveryDate: "2024-01-23",
-      total: 300,
-      trackingNumber: "1Z999AA1234567891",
-      canCancel: false,
-      canReturn: true,
-    },
-    {
-      id: "AMZ-2024-003",
-      items: [
-        {
-          name: "Recycled Ocean Plastic Water Bottle",
-          price: 400,
-          quantity: 3,
-          image:
-            "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=100&h=100&fit=crop",
-          packagingType: "recyclable",
-        },
-      ],
-      status: "processing",
-      orderDate: "2024-01-22",
-      total: 1200,
-      canCancel: true,
-      canReturn: false,
-    },
-  ];
+  const [ordersList, setOrdersList] = useState([]);
 
+  useEffect(() => {
+    import('../../../services/api').then(({ orderAPI }) => {
+      orderAPI.getMyOrders()
+        .then(res => {
+          if (res && res.orders && res.orders.length > 0) {
+            setOrdersList(res.orders.map(o => ({
+              ...o,
+              id: o._id || o.id,
+              orderDate: o.createdAt ? new Date(o.createdAt).toISOString().split('T')[0] : '2024-01-20',
+              canReturn: o.status === 'delivered',
+              canCancel: o.status === 'pending' || o.status === 'processing',
+            })));
+          } else {
+            setOrdersList([]);
+          }
+        })
+        .catch(() => {
+          setOrdersList([]);
+        });
+    });
+  }, []);
+
+  const orders = ordersList;
   const ongoingOrders = orders.filter((order) => order.status !== "delivered" && order.status !== "cancelled");
   const completedOrders = orders.filter((order) => order.status === "delivered");
   

@@ -25,308 +25,36 @@ import {
   CheckCircle,
 } from "lucide-react";
 
+import { productAPI } from "../../../../services/api";
+
 export default function RefurbishedCategoryPage() {
   const { slug } = useParams();
-  const [items, setItems] = useState([
-    {
-      id: "ref-1",
-      title: 'MacBook Pro 13" (2020) - Refurbished',
-      category: "laptops",
-      originalPrice: 1299.0 * 83,
-      refurbishedPrice: 899.0 * 83,
-      condition: "excellent",
-      description:
-        "Fully refurbished MacBook Pro with 8GB RAM and 256GB SSD. Includes 1-year warranty.",
-      images: [
-        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop",
-      ],
-      warranty: "1 Year",
-      location: "Mumbai, Maharashtra",
-      views: 156,
-      likes: 23,
-      sellerName: "Aarav S.",
-      sellerRating: 4.9,
-      sellerSales: 89,
-      refurbishedBy: "Apple Certified",
-      createdAt: "2024-01-20",
-      features: [
-        "Battery replaced",
-        "Keyboard cleaned",
-        "OS updated",
-        "All ports tested",
-      ],
-    },
-    {
-      id: "ref-2",
-      title: "iPhone 12 Pro - 128GB - Refurbished",
-      category: "phones",
-      originalPrice: 999.0 * 83,
-      refurbishedPrice: 649.0 * 83,
-      condition: "very-good",
-      description:
-        "Refurbished iPhone 12 Pro in excellent condition. New battery and screen protector included.",
-      images: [
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop",
-      ],
-      warranty: "6 Months",
-      location: "Delhi, Delhi",
-      views: 203,
-      likes: 31,
-      sellerName: "Priya R.",
-      sellerRating: 4.8,
-      sellerSales: 156,
-      refurbishedBy: "Certified Technician",
-      createdAt: "2024-01-18",
-      features: [
-        "New battery",
-        "Screen protector",
-        "Charger included",
-        "30-day return",
-      ],
-    },
-    {
-      id: "ref-3",
-      title: "Sony WH-1000XM4 Headphones - Refurbished",
-      category: "audio",
-      originalPrice: 349.0 * 83,
-      refurbishedPrice: 199.0 * 83,
-      condition: "excellent",
-      description:
-        "Premium noise-canceling headphones, fully tested and cleaned. Like new condition.",
-      images: [
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop",
-      ],
-      warranty: "3 Months",
-      location: "Bengaluru, Karnataka",
-      views: 89,
-      likes: 12,
-      sellerName: "Rohan K.",
-      sellerRating: 4.7,
-      sellerSales: 67,
-      refurbishedBy: "Sony Certified",
-      createdAt: "2024-01-15",
-      features: [
-        "Deep cleaned",
-        "New ear pads",
-        "Bluetooth tested",
-        "Case included",
-      ],
-    },
-    {
-      id: "ref-4",
-      title: "iPad Air 4th Gen - 64GB - Refurbished",
-      category: "tablets",
-      originalPrice: 599.0 * 83,
-      refurbishedPrice: 399.0 * 83,
-      condition: "good",
-      description:
-        "Refurbished iPad Air with minor cosmetic wear. Fully functional with new battery.",
-      images: [
-        "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300&h=300&fit=crop",
-      ],
-      warranty: "6 Months",
-      location: "Chennai, Tamil Nadu",
-      views: 134,
-      likes: 18,
-      sellerName: "Ananya M.",
-      sellerRating: 4.6,
-      sellerSales: 45,
-      refurbishedBy: "Apple Certified",
-      createdAt: "2024-01-12",
-      features: [
-        "New battery",
-        "Screen tested",
-        "Charger included",
-        "Minor cosmetic wear",
-      ],
-    },
-    {
-      id: "ref-5",
-      title: "Dell XPS 15 - Refurbished Laptop",
-      category: "laptops",
-      originalPrice: 1499.0 * 83,
-      refurbishedPrice: 999.0 * 83,
-      condition: "very-good",
-      description:
-        "Powerful Dell XPS 15 with 16GB RAM and 512GB SSD. Professional refurbishment.",
-      images: [
-        "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop",
-      ],
-      warranty: "1 Year",
-      location: "Hyderabad, Telangana",
-      views: 178,
-      likes: 25,
-      sellerName: "Vikram P.",
-      sellerRating: 4.8,
-      sellerSales: 112,
-      refurbishedBy: "Dell Certified",
-      createdAt: "2024-01-10",
-      features: [
-        "OS reinstalled",
-        "Hardware tested",
-        "New thermal paste",
-        "90-day return",
-      ],
-    },
-    {
-      id: "ref-6",
-      title: "Samsung Galaxy S21 - 128GB - Refurbished",
-      category: "phones",
-      originalPrice: 799.0 * 83,
-      refurbishedPrice: 449.0 * 83,
-      condition: "good",
-      description:
-        "Refurbished Samsung Galaxy S21 with new battery and screen protector.",
-      images: [
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop",
-      ],
-      warranty: "6 Months",
-      location: "Kolkata, West Bengal",
-      views: 167,
-      likes: 22,
-      sellerName: "Meera J.",
-      sellerRating: 4.7,
-      sellerSales: 89,
-      refurbishedBy: "Samsung Certified",
-      createdAt: "2024-01-08",
-      features: [
-        "New battery",
-        "Screen protector",
-        "Charger included",
-        "Minor wear",
-      ],
-    },
-    {
-      id: "ref-s1",
-      title: "iPhone 13 Pro - Refurbished",
-      category: "smartphones",
-      originalPrice: 999.99 * 83,
-      refurbishedPrice: 649.99 * 83,
-      condition: "excellent",
-      description:
-        "Professionally refurbished iPhone 13 Pro with 128GB storage, Face ID, and triple camera system. Includes 1-year warranty.",
-      images: [
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop",
-      ],
-      warranty: "1 Year",
-      location: "Mumbai, Maharashtra",
-      views: 156,
-      likes: 23,
-      sellerName: "TechHub Electronics",
-      sellerRating: 4.8,
-      sellerSales: 1247,
-      refurbishedBy: "Apple Certified",
-      createdAt: "2024-06-10",
-      features: [
-        "128GB Storage",
-        "Face ID",
-        "Triple Camera System",
-        "5G Ready",
-      ],
-    },
-    {
-      id: "ref-s2",
-      title: "Samsung Galaxy S21 - Refurbished",
-      category: "smartphones",
-      originalPrice: 699.0 * 83,
-      refurbishedPrice: 409.0 * 83,
-      condition: "very-good",
-      description:
-        "Refurbished Samsung Galaxy S21 with new battery and screen protector. 128GB, 5G, and 6.2-inch display.",
-      images: [
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop",
-      ],
-      warranty: "6 Months",
-      location: "Delhi, Delhi",
-      views: 203,
-      likes: 31,
-      sellerName: "Aditya N.",
-      sellerRating: 4.7,
-      sellerSales: 156,
-      refurbishedBy: "Samsung Certified",
-      createdAt: "2024-06-09",
-      features: ["128GB Storage", "5G Ready", "New Battery", "Screen Protector"],
-    },
-    {
-      id: "ref-s3",
-      title: "Google Pixel 7 - Refurbished",
-      category: "smartphones",
-      originalPrice: 759.0 * 83,
-      refurbishedPrice: 469.0 * 83,
-      condition: "good",
-      description:
-        "Google Pixel 7, refurbished, 128GB, Android 13, 50MP camera, 5G. 6-month warranty included.",
-      images: [
-        "https://refitglobal.com/cdn/shop/files/Google_Pixel_7_Lemongrass_B_7f56d45a-f85f-4db5-8a97-6d11fb10e501.jpg?v=1724185006&width=416",
-      ],
-      warranty: "6 Months",
-      location: "Kolkata, West Bengal",
-      views: 167,
-      likes: 22,
-      sellerName: "Neha S.",
-      sellerRating: 4.6,
-      sellerSales: 89,
-      refurbishedBy: "Google Certified",
-      createdAt: "2024-06-08",
-      features: ["128GB Storage", "Android 13", "50MP Camera", "5G Ready"],
-    },
-    {
-      id: "ref-s4",
-      title: "OnePlus 9 Pro - Refurbished",
-      category: "smartphones",
-      originalPrice: 723.0 * 83,
-      refurbishedPrice: 259.0 * 83,
-      condition: "very-good",
-      description:
-        "Refurbished OnePlus 9 Pro, 256GB, 5G, Hasselblad camera, 120Hz AMOLED display.",
-      images: [
-        "https://oasis.opstatics.com/content/dam/oasis/page/2021/9-series/spec-image/9-pro/Morning%20mist-gallery.png",
-      ],
-      warranty: "3 Months",
-      location: "Chennai, Tamil Nadu",
-      views: 134,
-      likes: 18,
-      sellerName: "Karan P.",
-      sellerRating: 4.5,
-      sellerSales: 45,
-      refurbishedBy: "OnePlus Certified",
-      createdAt: "2024-06-07",
-      features: [
-        "256GB Storage",
-        "5G Ready",
-        "Hasselblad Camera",
-        "120Hz AMOLED Display",
-      ],
-    },
-    {
-      id: "ref-s5",
-      title: "Microsoft Surface Pro 8 - Refurbished",
-      category: "tablets",
-      originalPrice: 1099.0 * 83,
-      refurbishedPrice: 699.0 * 83,
-      condition: "excellent",
-      description:
-        "Microsoft Surface Pro 8, refurbished, Intel i5, 8GB RAM, 128GB SSD, 13-inch PixelSense display. 1-year warranty included.",
-      images: [
-        "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400&h=400&fit=crop",
-      ],
-      warranty: "1 Year",
-      location: "Bengaluru, Karnataka",
-      views: 112,
-      likes: 15,
-      sellerName: "Riya G.",
-      sellerRating: 4.9,
-      sellerSales: 56,
-      refurbishedBy: "Microsoft Certified",
-      createdAt: "2024-06-06",
-      features: [
-        "Intel i5",
-        "8GB RAM",
-        "128GB SSD",
-        "13-inch PixelSense Display",
-      ],
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    productAPI.getAll({ type: 'refurbished', category: slug })
+      .then(res => {
+        if (res && res.products) {
+          const mapped = res.products.map(p => ({
+            ...p,
+            id: p.legacyId || p._id,
+            title: p.title || p.name,
+            refurbishedPrice: p.refurbishedPrice || p.price,
+            originalPrice: p.originalPrice || Math.round((p.refurbishedPrice || p.price) * 1.3),
+            images: p.images && p.images.length > 0 ? p.images : [p.image],
+            warranty: p.warranty || '1 Year',
+            sellerName: p.sellerName || 'Verified Refurbisher',
+            sellerRating: p.sellerRating || 4.8,
+            sellerSales: p.sellerSales || 50,
+          }));
+          setItems(mapped);
+        }
+      })
+      .catch(err => console.error("Error fetching refurbished products from DB:", err))
+      .finally(() => setIsLoading(false));
+  }, [slug]);
 
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -337,16 +65,24 @@ export default function RefurbishedCategoryPage() {
   const categoryInfo = {
     laptops: { name: "Laptops & Computers", icon: "💻", color: "blue" },
     smartphones: { name: "Smartphones", icon: "📱", color: "green" },
+    phones: { name: "Smartphones", icon: "📱", color: "green" },
     tablets: { name: "Tablets", icon: "📱", color: "purple" },
     audio: { name: "Audio & Headphones", icon: "🎧", color: "orange" },
+    headphones: { name: "Audio & Headphones", icon: "🎧", color: "orange" },
+    smartwatches: { name: "Smartwatches & Wearables", icon: "⌚", color: "green" },
     gaming: { name: "Gaming Consoles", icon: "🎮", color: "indigo" },
     cameras: { name: "Cameras & Photography", icon: "📷", color: "teal" },
-  }
+    accessories: { name: "Accessories", icon: "🔌", color: "teal" },
+  };
   
-  const category = categoryInfo[slug]
+  const category = categoryInfo[slug] || {
+    name: slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : "Refurbished Items",
+    icon: "♻️",
+    color: "green"
+  };
   
   useEffect(() => {
-    let filtered = items.filter(item => item.category === slug)
+    let filtered = [...items];
   
     // Search filter
     if (searchQuery) {

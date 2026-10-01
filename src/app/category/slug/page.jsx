@@ -4,18 +4,46 @@ import Header from '../../../components/header'
 import ProductCard from '../../../components/product-card'
 import { Button } from '../../../components/ui/button'
 import { Filter } from 'lucide-react'
-import { getProductsByCategory, categories } from '../../../lib/products-data'
+import { categories } from '../../../lib/products-data'
+import { productAPI } from '../../../services/api'
 
 export default function CategoryPage() {
   const { slug } = useParams()
+  const [rawProducts, setRawProducts] = useState([])
   const [products, setProducts] = useState([])
   const [sortBy, setSortBy] = useState('featured')
   const [priceRange, setPriceRange] = useState('all')
 
-  const category = categories.find((cat) => cat.id === slug)
+  const category = categories.find((cat) => cat.id === slug) || {
+    id: slug,
+    name: slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Eco Products',
+    icon: '🌱'
+  }
 
   useEffect(() => {
-    let categoryProducts = getProductsByCategory(slug)
+    productAPI.getByCategory(slug)
+      .then(res => {
+        const prods = (res && res.products) ? res.products : (Array.isArray(res) ? res : []);
+        setRawProducts(prods.map(p => ({
+          ...p,
+          id: p.legacyId || p._id,
+          name: p.name || p.title,
+          price: p.price || p.refurbishedPrice || 0,
+          originalPrice: p.originalPrice || Math.round((p.price || p.refurbishedPrice || 0) * 1.25),
+          rating: p.rating || 4.5,
+          reviewCount: p.reviewCount || 120,
+          greenRating: p.greenRating || 5,
+          certifications: p.certifications || 3,
+          image: p.image || (p.images && p.images[0]) || "",
+        })));
+      })
+      .catch(err => {
+        console.error("Error loading category products from DB:", err);
+      });
+  }, [slug])
+
+  useEffect(() => {
+    let categoryProducts = [...rawProducts]
 
     // Apply sorting
     if (sortBy === 'price-low') {
@@ -28,19 +56,19 @@ export default function CategoryPage() {
       categoryProducts = categoryProducts.sort((a, b) => b.greenRating - a.greenRating)
     }
 
-    // Apply price filter
-    if (priceRange === 'under-25') {
-      categoryProducts = categoryProducts.filter((p) => p.price < 25)
-    } else if (priceRange === '25-50') {
-      categoryProducts = categoryProducts.filter((p) => p.price >= 25 && p.price <= 50)
-    } else if (priceRange === '50-100') {
-      categoryProducts = categoryProducts.filter((p) => p.price >= 50 && p.price <= 100)
-    } else if (priceRange === 'over-100') {
-      categoryProducts = categoryProducts.filter((p) => p.price > 100)
+    // Apply price filter (handling INR thresholds)
+    if (priceRange === 'under-1000' || priceRange === 'under-25') {
+      categoryProducts = categoryProducts.filter((p) => p.price < 1000)
+    } else if (priceRange === '1000-5000' || priceRange === '25-50') {
+      categoryProducts = categoryProducts.filter((p) => p.price >= 1000 && p.price <= 5000)
+    } else if (priceRange === '5000-10000' || priceRange === '50-100') {
+      categoryProducts = categoryProducts.filter((p) => p.price >= 5000 && p.price <= 10000)
+    } else if (priceRange === 'over-10000' || priceRange === 'over-100') {
+      categoryProducts = categoryProducts.filter((p) => p.price > 10000)
     }
 
     setProducts(categoryProducts)
-  }, [slug, sortBy, priceRange])
+  }, [rawProducts, sortBy, priceRange])
 
   if (!category) {
     return (
@@ -97,10 +125,10 @@ export default function CategoryPage() {
               className="border rounded px-3 py-2 text-sm"
             >
               <option value="all">All Prices</option>
-              <option value="under-25">Under $25</option>
-              <option value="25-50">$25 - $50</option>
-              <option value="50-100">$50 - $100</option>
-              <option value="over-100">Over $100</option>
+              <option value="under-1000">Under ₹1,000</option>
+              <option value="1000-5000">₹1,000 - ₹5,000</option>
+              <option value="5000-10000">₹5,000 - ₹10,000</option>
+              <option value="over-10000">Over ₹10,000</option>
             </select>
           </div>
         </div>

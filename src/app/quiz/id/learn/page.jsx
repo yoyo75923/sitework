@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getQuizById } from '../../../../lib/quiz-data';
+import { quizAPI } from '../../../../services/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const SECONDS_PER_SLIDE = 15; // Estimated reading time per slide
@@ -7,7 +7,8 @@ const SECONDS_PER_SLIDE = 15; // Estimated reading time per slide
 export default function QuizLearnPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const quiz = getQuizById(id);
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   const [slide, setSlide] = useState(0);
   const [timer, setTimer] = useState(SECONDS_PER_SLIDE);
@@ -15,10 +16,22 @@ export default function QuizLearnPage() {
   const [completed, setCompleted] = useState(false);
   
   useEffect(() => {
-    if (!quiz || !quiz.pointsToRead) {
-      navigate('/404'); // Or a relevant error page
-    }
-  }, [quiz, navigate]);
+    setLoading(true);
+    quizAPI.getById(id)
+      .then(res => {
+        if (res) {
+          setQuiz({
+            ...res,
+            id: res.legacyId || res._id,
+            pointsToRead: res.pointsToRead || []
+          });
+        } else {
+          navigate('/404');
+        }
+      })
+      .catch(() => navigate('/404'))
+      .finally(() => setLoading(false));
+  }, [id, navigate]);
 
   useEffect(() => {
     if (quiz && quiz.pointsToRead) {

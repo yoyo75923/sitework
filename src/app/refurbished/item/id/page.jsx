@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { productAPI } from "../../../../services/api"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import Header from "../../../../components/header"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
@@ -25,50 +26,6 @@ function ChevronLeftIcon(props) {
   )
 }
 
-// Add mock items for lookup
-const refItems = {
-  "refurb-1": {
-    id: "refurb-1",
-    name: "iPhone 13 Pro - Refurbished",
-    originalPrice: 999.99 * 83,
-    price: 649.99 * 83,
-    savings: 350.0 * 83,
-    condition: "Excellent",
-    warranty: "1 Year Apple Warranty",
-    image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop",
-    brand: "Apple",
-    category: "smartphones",
-    inStock: true,
-    features: ["128GB Storage", "Face ID", "Triple Camera System", "5G Ready"],
-    detailedDescription: "This iPhone 13 Pro has been professionally refurbished to excellent condition. It features the powerful A15 Bionic chip, stunning Super Retina XDR display, and an advanced triple-camera system. The device has been thoroughly tested and cleaned, with any necessary parts replaced to ensure optimal performance.",
-    specifications: {
-      Display: "6.1-inch Super Retina XDR",
-      Chip: "A15 Bionic",
-      Storage: "128GB",
-      Camera: "Triple 12MP system",
-      Battery: "Up to 22 hours video playback",
-      "Water Resistance": "IP68",
-      "5G": "Yes",
-      "Face ID": "Yes",
-    },
-    conditionDetails: [
-      "Screen is in perfect condition with no scratches",
-      "Body shows minimal signs of use",
-      "All buttons and ports function perfectly",
-      "Battery health is 85% or higher",
-      "Camera lenses are clear and scratch-free",
-    ],
-    whatsIncluded: ["iPhone 13 Pro device", "Lightning to USB-C cable", "Documentation", "1 Year Apple Warranty"],
-    seller: {
-      name: "TechHub Electronics",
-      isVerified: true,
-      rating: 4.8,
-      totalSales: 1247,
-    },
-  },
-  // ...repeat for all refurb-2, refurb-3, etc. from main page...
-}
-
 export default function RefurbishedItemPage() {
   const params = useParams()
   const navigate = useNavigate()
@@ -76,8 +33,59 @@ export default function RefurbishedItemPage() {
   const [isLiked, setIsLiked] = useState(false)
   const [quantity, setQuantity] = useState(1)
 
-  // Lookup for mock smartphones
-  const item = refItems[params.id] || refItems["refurb-1"]
+  const [item, setItem] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    setIsLoading(true)
+    productAPI.getById(params.id)
+      .then(res => {
+        if (res) {
+          const mapped = {
+            ...res,
+            id: res.legacyId || res._id,
+            name: res.name || res.title,
+            price: res.refurbishedPrice || res.price,
+            originalPrice: res.originalPrice || Math.round((res.refurbishedPrice || res.price) * 1.3),
+            savings: res.savings || Math.max(0, (res.originalPrice || Math.round((res.refurbishedPrice || res.price) * 1.3)) - (res.refurbishedPrice || res.price)),
+            condition: res.condition || 'Excellent',
+            warranty: res.warranty || '1 Year Warranty',
+            image: (res.images && res.images.length > 0) ? res.images[0] : (res.image || ''),
+            images: (res.images && res.images.length > 0) ? res.images : (res.image ? [res.image] : []),
+            brand: res.brand || 'Certified',
+            category: res.category || 'smartphones',
+            inStock: res.inStock !== false,
+            features: res.features || [],
+            detailedDescription: res.detailedDescription || res.description || "Professionally inspected and refurbished to pristine working condition with rigorous quality testing.",
+            specifications: res.specifications || {},
+            conditionDetails: [
+              "Screen is in pristine condition with no noticeable blemishes",
+              "Body and chassis show minimal or no signs of handling",
+              "All buttons, switches, and ports function perfectly",
+              "Battery health tested and certified at peak performance",
+              "Thoroughly sanitized and repackaged"
+            ],
+            whatsIncluded: [
+              `${res.name || res.title || 'Device'}`,
+              "Certified Charging Cable & Adapter",
+              "Warranty & Documentation",
+              `${res.warranty || '1 Year Warranty'}`
+            ],
+            seller: {
+              name: res.sellerName || 'Verified Refurbisher',
+              isVerified: true,
+              rating: res.sellerRating || 4.8,
+              totalSales: res.sellerSales || 150
+            }
+          };
+          setItem(mapped);
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching refurbished item from DB:", err);
+      })
+      .finally(() => setIsLoading(false));
+  }, [params.id]);
 
   const getConditionColor = (condition) => {
     switch (condition.toLowerCase()) {
@@ -101,6 +109,29 @@ export default function RefurbishedItemPage() {
         className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
       />
     ))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <p className="text-gray-500 text-lg">Loading refurbished product details from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
+          <Button onClick={() => navigate('/refurbished')}>Back to Refurbished</Button>
+        </div>
+      </div>
+    );
   }
 
   const savingsPercentage = Math.round((item.savings / item.originalPrice) * 100)

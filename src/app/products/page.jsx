@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from '../../components/header';
 import ProductCard from '../../components/product-card';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -12,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { allProducts } from '../../lib/products-data';
+import { productAPI } from '../../services/api';
 
 // Define categories locally (copy from where it's used or from another file)
 const categories = [
@@ -31,10 +31,26 @@ const categories = [
 ];
 
 export default function ProductsPage() {
+  const [productsList, setProductsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    productAPI.getAll()
+      .then(res => {
+        if (res && res.products && res.products.length > 0) {
+          setProductsList(res.products);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   // Get trending products (top rated products)
-  const trendingProducts = allProducts
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 8);
+  const trendingProducts = useMemo(() => {
+    return [...productsList]
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 8);
+  }, [productsList]);
 
   const getCategoryIcon = (icon) => {
     return <span className="text-2xl">{icon}</span>;
@@ -103,34 +119,8 @@ export default function ProductsPage() {
   };
 
   const getCategoryImage = (categoryId) => {
-    switch (categoryId) {
-      case "clothing":
-        return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop";
-      case "electronics":
-        return "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop";
-      case "footwear":
-        return "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop";
-      case "home-garden":
-        return "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop";
-      case "personal-care":
-        return "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&h=300&fit=crop";
-      case "beauty-skincare":
-        return "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=300&fit=crop";
-      case "sports-fitness":
-        return "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop";
-      case "books-education":
-        return "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop";
-      case "pet-care":
-        return "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop";
-      case "baby-kids":
-        return "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=300&fit=crop";
-      case "office-stationery":
-        return "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=300&fit=crop";
-      case "outdoor-camping":
-        return "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop";
-      default:
-        return "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop";
-    }
+    const prod = productsList.find(p => p.category === categoryId);
+    return (prod && (prod.image || (prod.images && prod.images[0]))) || "";
   };
 
   return (

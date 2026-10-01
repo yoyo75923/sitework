@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "../../../components/header";
 import { Button } from "../../../components/ui/button";
@@ -14,71 +14,72 @@ import {
 } from "lucide-react";
 import ProductReviews from "../../../components/product-reviews";
 import { useCart } from "../../../components/cart-provider";
+import { productAPI } from "../../../services/api";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const { addToCart } = useCart();
 
-  // Mock product data
+  // Dynamic product data initialized from API or mock
+  const [productData, setProductData] = useState(null);
+
+  useEffect(() => {
+    productAPI.getById(params.id)
+      .then(res => {
+        if (res) {
+          setProductData(res);
+        }
+      })
+      .catch(err => {
+        console.warn("Could not fetch product from backend:", err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <p className="text-gray-500 text-lg">Loading product details from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!productData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
+          <Link to="/products" className="text-blue-600 hover:underline">Back to All Products</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const rawProduct = productData;
   const product = {
-    id: String(params.id),
-    name: "Organic Cotton T-Shirt - Sustainable Fashion",
-    price: 699,
-    originalPrice: 899,
-    rating: 4.5,
-    reviewCount: 1247,
-    greenRating: 5,
-    images: [
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", // front
-      "https://brownliving.in/cdn/shop/files/human-nature-kids-unisex-organic-cotton-t-shirt-white-ek-saath-sustainable-kids-t-shirts-brown-living-hn-kt-white-2-325646.jpg?v=1720439122&width=1200", // back
-      "https://notbasics.co.uk/cdn/shop/files/womens-organic-white-cotton-tshirt-back-view.png?crop=region&crop_height=2400&crop_left=26&crop_top=0&crop_width=1608&v=1744151022&width=1660", // side
-      "https://brownliving.in/cdn/shop/files/ek-saath-womens-organic-cotton-t-shirt-white-ek-saath-sustainable-womens-t-shirt-brown-living-hn-wt-es-wh-s-904992.jpg?v=1720422377&width=975", // detail/closeup
-    ],
-    certifications: [
-      {
-        name: "Global Organic Textile Standard (GOTS)",
-        description:
-          "Ensures fibers are ≥70% organic, prohibits toxic inputs, and requires social criteria (wages, working conditions).",
-      },
-      {
-        name: "OEKO‑TEX® Standard 100",
-        description:
-          "Certifies that every component (thread, button, dye) has been lab‑tested to be free from a long list of harmful chemicals.",
-      },
-      {
-        name: "Global Recycled Standard (GRS)",
-        description:
-          "Verifies the percentage of recycled material (e.g. post‑consumer PET bottles → polyester yarn) and enforces environmental/social best practices.",
-      },
-      {
-        name: "Cradle to Cradle Certified",
-        description:
-          "Assesses material chemistry, recyclability, renewable‑energy use, water stewardship, and social fairness—across five progressive levels.",
-      },
-      {
-        name: "ClimatePartner Climate Neutral",
-        description:
-          "Verifies that a brand has calculated, reduced, and offset the garment's CO₂ footprint through certified offset projects.",
-      },
-    ],
-    description: `This premium organic cotton t-shirt represents the perfect blend of comfort, style, and sustainability. Made from 100% GOTS-certified organic cotton, this shirt is not only incredibly soft and breathable but also produced with the highest environmental and social standards.
-
-Key Features:
-• 100% GOTS-certified organic cotton
-• Fair Trade certified production
-• Carbon-neutral manufacturing process
-• Natural dyes with no harmful chemicals
-• Pre-shrunk for lasting fit
-• Available in multiple sustainable colors
-
-Our commitment to sustainability extends beyond just the materials. Each shirt is produced in facilities powered by renewable energy, and we plant a tree for every purchase made. The packaging is 100% recyclable and made from post-consumer recycled materials.
-
-Care Instructions: Machine wash cold with like colors, tumble dry low, iron on low heat if needed.`,
-    prime: true,
-    inStock: true,
+    ...rawProduct,
+    id: rawProduct._id || rawProduct.id || String(params.id),
+    images: rawProduct.images && rawProduct.images.length > 0
+      ? rawProduct.images
+      : (rawProduct.image ? [rawProduct.image] : []),
+    certifications: Array.isArray(rawProduct.certifications) && rawProduct.certifications.length > 0 && typeof rawProduct.certifications[0] === 'object'
+      ? rawProduct.certifications
+      : [
+          {
+            name: "Eco-Friendly Certified",
+            description: "Meets certified environmental standards for sustainability."
+          }
+        ]
   };
 
   const renderStars = (rating, isGreen = false) => {

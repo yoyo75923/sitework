@@ -12,42 +12,7 @@ export default function ProductReviews({ productId, averageRating, totalReviews 
     content: "",
   })
 
-  // Mock reviews data
-  const reviews = [
-    {
-      id: "1",
-      customerName: "Sarah M.",
-      rating: 5,
-      title: "Amazing quality and truly sustainable!",
-      content:
-        "I've been wearing this organic cotton t-shirt for months now and it still looks brand new. The fabric is incredibly soft and breathable. Love knowing that my purchase is helping the environment!",
-      date: "2024-01-10",
-      helpful: 12,
-      notHelpful: 1,
-    },
-    {
-      id: "2",
-      customerName: "Mike R.",
-      rating: 4,
-      title: "Great shirt, fast shipping",
-      content:
-        "Really happy with this purchase. The fit is perfect and the material feels premium. Arrived quickly with minimal packaging which I appreciated.",
-      date: "2024-01-08",
-      helpful: 8,
-      notHelpful: 0,
-    },
-    {
-      id: "3",
-      customerName: "Emma L.",
-      rating: 5,
-      title: "Perfect for sensitive skin",
-      content:
-        "I have very sensitive skin and this organic cotton is perfect. No irritation at all and it gets softer with each wash. The certifications give me confidence in the quality.",
-      date: "2024-01-05",
-      helpful: 15,
-      notHelpful: 2,
-    },
-  ]
+  const [reviews, setReviews] = useState([])
 
   const renderStars = (rating, size = "w-4 h-4") => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -60,8 +25,18 @@ export default function ProductReviews({ productId, averageRating, totalReviews 
 
   const handleSubmitReview = (e) => {
     e.preventDefault()
-    // Handle review submission
-    console.log("New review:", newReview)
+    if (!newReview.title || !newReview.content) return
+    const reviewItem = {
+      id: String(Date.now()),
+      customerName: "You",
+      rating: newReview.rating,
+      title: newReview.title,
+      content: newReview.content,
+      date: new Date().toISOString().split("T")[0],
+      helpful: 0,
+      notHelpful: 0,
+    }
+    setReviews((prev) => [reviewItem, ...prev])
     setShowWriteReview(false)
     setNewReview({ rating: 5, title: "", content: "" })
   }

@@ -37,7 +37,7 @@ function App() {
             <Router>
               <Layout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/login" />} />
+                  <Route path="/" element={<Home />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/category/:slug" element={<Category />} />
                   <Route path="/customer/dashboard" element={<CustomerDashboard />} />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProductDetails from "./ProductDetails";
 import { useAuth } from "../../components/auth-provider";
 import { useCart } from "../../components/cart-provider";
+import { productAPI } from "../../services/api";
 export default function AmazonClone() {
   const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -18,112 +19,27 @@ export default function AmazonClone() {
     }
   }, []);
 
-  const products = [
-    {
-      id: 1,
-      name: "Sony WH-1000XM4 Wireless Industry Leading Noise Canceling Overhead Headphones",
-      price: 299.99 * 83,
-      originalPrice: 349.99 * 83,
-      image: "https://m.media-amazon.com/images/I/71o8Q5XJS5L._AC_SL1500_.jpg",
-      badge: "Amazon's Choice",
-      discount: "14% off",
-      description: "Industry-leading noise canceling with Dual Noise Sensor technology.",
-      features: ["Industry-leading noise canceling", "30-hour battery life", "Touch sensor controls"],
-      specifications: {
-        "Battery Life": "30 hours",
-        "Bluetooth Version": "5.0",
-        Weight: "254g",
-        "Charging Time": "3 hours",
-        "Water Resistance": "No"
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    productAPI.getAll().then(res => {
+      if (res && res.products) {
+        setProducts(res.products.slice(0, 8).map(p => ({
+          ...p,
+          id: p.legacyId || p._id,
+          name: p.name || p.title,
+          price: p.price,
+          originalPrice: p.originalPrice || Math.round(p.price * 1.2),
+          image: p.image || (p.images && p.images[0]) || "",
+          badge: p.rating >= 4.5 ? "Best Seller" : "Amazon's Choice",
+          discount: "15% off",
+          description: p.description,
+          features: p.features || ["Eco-certified", "Sustainable materials"],
+          specifications: p.specifications || {}
+        })));
       }
-    },
-    {
-      id: 2,
-      name: "Samsung Galaxy S21 5G Android Smartphone 128GB Unlocked Phantom Gray",
-      price: 699.99 * 83,
-      originalPrice: 799.99 * 83,
-      image: "https://m.media-amazon.com/images/I/91iwO+XKsVL.jpg",
-      badge: "Best Seller",
-      discount: "13% off",
-      description: "Features a stunning 6.2-inch Dynamic AMOLED display, Snapdragon 888 processor.",
-      features: ["6.2-inch Display", "Snapdragon 888", "Triple camera", "5G"],
-      specifications: {
-        Display: "6.2-inch",
-        Processor: "Snapdragon 888",
-        RAM: "8GB",
-        Storage: "128GB",
-        Battery: "4000mAh"
-      }
-    },
-    {
-      id: 3,
-      name: "HP Pavilion 15.6 inch FHD Laptop, AMD Ryzen 5, 8GB RAM, 256GB SSD",
-      price: 599.49 * 83,
-      originalPrice: 699.99 * 83,
-      image: "https://m.media-amazon.com/images/I/71lWuRFiCoL._UF1000,1000_QL80_.jpg",
-      discount: "14% off",
-      description: "Powerful performance meets sleek design with HP Pavilion.",
-      features: ["Ryzen 5", "15.6-inch FHD", "8GB RAM", "256GB SSD"],
-      specifications: {
-        Processor: "AMD Ryzen 5",
-        Display: "15.6-inch Full HD",
-        RAM: "8GB",
-        Storage: "256GB SSD",
-        OS: "Windows 11 Home"
-      }
-    },
-    {
-      id: 4,
-      name: "Regular Cotton T-Shirt - Classic Fit",
-      price: 1299,
-      originalPrice: 1499,
-      image: "https://fullyfilmy.in/cdn/shop/products/New-Mockups---no-hanger---TShirt-Yellow.jpg?v=1747992993",
-      discount: "13% off",
-      description: "A classic fit, regular cotton t-shirt. Not eco-friendly.",
-      features: ["100% cotton", "Classic fit", "Durable"],
-      specifications: {
-        Material: "100% Cotton",
-        Fit: "Classic",
-        Colors: "White, Black, Blue, Red",
-        Sizes: "S, M, L, XL, XXL"
-      }
-    },
-    {
-      id: 5,
-      name: "Apple AirPods Pro (2nd Gen)",
-      price: 199.99 * 83,
-      originalPrice: 249.99 * 83,
-      image: "https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_SL1500_.jpg",
-      badge: "Best Seller",
-      discount: "20% off"
-    },
-    {
-      id: 6,
-      name: "Nintendo Switch OLED Model",
-      price: 349.99 * 83,
-      originalPrice: 399.99 * 83,
-      image: "https://m.media-amazon.com/images/I/61-PblYntsL._AC_SL1500_.jpg",
-      badge: "Amazon's Choice",
-      discount: "13% off"
-    },
-    {
-      id: 7,
-      name: "Instant Pot Duo 7-in-1",
-      price: 79.99 * 83,
-      originalPrice: 99.99 * 83,
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR-6qrfz1Dc-bwmjQt3puwxw0QB4Wt6lmIow&s",
-      badge: "Amazon's Choice",
-      discount: "20% off"
-    },
-    {
-      id: 8,
-      name: "Echo Dot (5th Gen)",
-      price: 39.99 * 83,
-      originalPrice: 49.99 * 83,
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgD5EXxwdVhwpvfh-G7UgqCAU1DXSQtud8Aw&s",
-      discount: "20% off"
-    }
-  ];
+    }).catch(err => console.error("Error fetching ecosmart products:", err));
+  }, []);
 
   const handleAmazonGreen = () => {
     if (typeof window !== "undefined") {
@@ -275,7 +191,7 @@ export default function AmazonClone() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome to Amazon Marketplace</h2>
           <p className="text-gray-700 text-lg">Everything you need, delivered to your door. Discover millions of products at great prices.</p>
         </div>
-        <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop')] bg-cover bg-center" />
+        <div className="absolute inset-0 opacity-15 bg-gradient-to-r from-emerald-800 to-teal-900" />
       </section>
 
       {/* Main Content */}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { marketplaceAPI } from "../../../../services/api";
 import Header from "../../../../components/header";
 import { Card, CardContent, CardMedia } from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
@@ -26,228 +27,38 @@ import {
 
 export default function MarketplaceCategoryPage() {
   const { slug } = useParams();
-  const [items, setItems] = useState([
-    {
-      id: "p2p-1",
-      title: "Vintage Denim Jacket - Size M",
-      category: "clothing",
-      price: 799,
-      condition: "good",
-      description:
-        "Classic vintage denim jacket in great condition. Slight fading which adds to the vintage look.",
-      images: [
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Mumbai, Maharashtra",
-      views: 47,
-      likes: 8,
-      sellerName: "Aarav S.",
-      sellerRating: 4.8,
-      sellerSales: 23,
-      createdAt: "2024-01-20",
-    },
-    {
-      id: "p2p-2",
-      title: "Harry Potter Complete Book Set",
-      category: "books",
-      price: 45.0,
-      condition: "like-new",
-      description:
-        "Complete Harry Potter series in excellent condition. All 7 books included, barely read.",
-      images: [
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: true,
-      location: "Delhi, Delhi",
-      views: 89,
-      likes: 15,
-      sellerName: "Priya R.",
-      sellerRating: 4.9,
-      sellerSales: 41,
-      createdAt: "2024-01-18",
-    },
-    {
-      id: "p2p-3",
-      title: "Ceramic Plant Pots Set of 3",
-      category: "home-decor",
-      price: 25.0,
-      condition: "good",
-      description:
-        "Beautiful ceramic plant pots, perfect for small plants. One has a tiny chip but still functional.",
-      images: [
-        "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Bengaluru, Karnataka",
-      views: 34,
-      likes: 6,
-      sellerName: "Rohan K.",
-      sellerRating: 4.6,
-      sellerSales: 12,
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "p2p-4",
-      title: "Nike Running Shoes - Size 9",
-      category: "sports",
-      price: 55.0,
-      condition: "good",
-      description:
-        "Nike Air Max running shoes, lightly used. Great for jogging and casual wear.",
-      images: [
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: true,
-      location: "Chennai, Tamil Nadu",
-      views: 67,
-      likes: 12,
-      sellerName: "Ananya M.",
-      sellerRating: 4.7,
-      sellerSales: 18,
-      createdAt: "2024-01-12",
-    },
-    {
-      id: "p2p-5",
-      title: "Wooden Chess Set - Handcrafted",
-      category: "toys",
-      price: 40.0,
-      condition: "like-new",
-      description:
-        "Beautiful handcrafted wooden chess set. All pieces included, barely used.",
-      images: [
-        "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Hyderabad, Telangana",
-      views: 23,
-      likes: 4,
-      sellerName: "Vikram P.",
-      sellerRating: 4.5,
-      sellerSales: 8,
-      createdAt: "2024-01-10",
-    },
-    {
-      id: "p2p-6",
-      title: "Bluetooth Wireless Headphones",
-      category: "electronics",
-      price: 75.0,
-      condition: "good",
-      description:
-        "Sony wireless headphones in good working condition. Minor wear on headband padding.",
-      images: [
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: true,
-      location: "Kolkata, West Bengal",
-      views: 91,
-      likes: 18,
-      sellerName: "Meera J.",
-      sellerRating: 4.8,
-      sellerSales: 29,
-      createdAt: "2024-01-08",
-    },
-    {
-      id: "p2p-7",
-      title: "Men's Cotton Shorts - Navy Blue",
-      category: "clothing",
-      price: 499,
-      condition: "good",
-      description:
-        "Comfortable cotton shorts, perfect for summer. Lightly used, no stains or tears.",
-      images: [
-        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Pune, Maharashtra",
-      views: 22,
-      likes: 3,
-      sellerName: "Rishi T.",
-      sellerRating: 4.6,
-      sellerSales: 7,
-      createdAt: "2024-01-19",
-    },
-    {
-      id: "p2p-8",
-      title: "Graphic Print T-Shirt - Large",
-      category: "clothing",
-      price: 429,
-      condition: "like-new",
-      description:
-        "Trendy graphic print t-shirt, barely worn. 100% cotton, soft and breathable.",
-      images: [
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Bengaluru, Karnataka",
-      views: 18,
-      likes: 2,
-      sellerName: "Sneha M.",
-      sellerRating: 4.7,
-      sellerSales: 11,
-      createdAt: "2024-01-17",
-    },
-    {
-      id: "p2p-9",
-      title: "Slim Fit Blue Jeans - 32W 32L",
-      category: "clothing",
-      price: 699,
-      condition: "good",
-      description:
-        "Classic slim fit blue jeans, gently used. No rips, all buttons and zippers intact.",
-      images: [
-        "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Ahmedabad, Gujarat",
-      views: 25,
-      likes: 4,
-      sellerName: "Karan P.",
-      sellerRating: 4.5,
-      sellerSales: 9,
-      createdAt: "2024-01-16",
-    },
-    {
-      id: "p2p-10",
-      title: "Formal White Shirt - Size 40",
-      category: "clothing",
-      price: 549,
-      condition: "like-new",
-      description:
-        "Elegant formal white shirt, worn only once for an interview. No marks, crisp and clean.",
-      images: [
-        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Delhi, Delhi",
-      views: 30,
-      likes: 5,
-      sellerName: "Amit S.",
-      sellerRating: 4.9,
-      sellerSales: 15,
-      createdAt: "2024-01-14",
-    },
-    {
-      id: "p2p-11",
-      title: "Woolen Sweater - Maroon, Medium",
-      category: "clothing",
-      price: 649,
-      condition: "good",
-      description:
-        "Warm woolen sweater, maroon color, perfect for winter. No holes or pilling.",
-      images: [
-        "https://images.unsplash.com/photo-1503602642458-232111445657?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Shimla, Himachal Pradesh",
-      views: 12,
-      likes: 2,
-      sellerName: "Priya D.",
-      sellerRating: 4.8,
-      sellerSales: 6,
-      createdAt: "2024-01-13",
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    marketplaceAPI.getAll({ category: slug })
+      .then(res => {
+        if (res && res.listings) {
+          const mapped = res.listings.map(l => ({
+            ...l,
+            id: l.legacyId || l._id,
+            title: l.title,
+            price: l.price,
+            category: l.category,
+            condition: l.condition,
+            description: l.description,
+            images: l.images && l.images.length > 0 ? l.images : (l.image ? [l.image] : []),
+            hasReceipt: l.hasReceipt || false,
+            location: l.location || "Mumbai, Maharashtra",
+            views: l.views || 25,
+            likes: l.likes || 5,
+            sellerName: l.sellerName || "Marketplace Member",
+            sellerRating: l.sellerRating || 4.8,
+            sellerSales: l.sellerSales || 15,
+            createdAt: l.createdAt ? new Date(l.createdAt).toISOString().split('T')[0] : "2024-01-20"
+          }));
+          setItems(mapped);
+        }
+      })
+      .catch(err => console.error("Error fetching category marketplace listings:", err))
+      .finally(() => setIsLoading(false));
+  }, [slug]);
 
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-import { getAllLearningTopics } from "../../lib/quiz-data";
+import { quizAPI } from "../../services/api";
 import { Link } from "react-router-dom";
 
 export default function LearnPage() {
-  const topics = getAllLearningTopics();
+  const [topics, setTopics] = useState([]);
   const [today, setToday] = useState(null);
 
   useEffect(() => {
     setToday(new Date());
+    quizAPI.getAll()
+      .then(res => {
+        if (res && res.length > 0) {
+          setTopics(res.map(q => ({
+            ...q,
+            id: q.legacyId || q._id,
+            availableDate: q.availableDate || '2024-01-01'
+          })));
+        }
+      })
+      .catch(err => console.error("Error loading learning topics from DB:", err));
   }, []);
 
   return (

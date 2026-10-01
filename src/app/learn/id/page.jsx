@@ -1,22 +1,34 @@
 import { useEffect, useState } from "react";
-import { getLearningTopicById } from "../../../lib/quiz-data";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { quizzes } from "../../../lib/quiz-data";
+import { quizAPI } from "../../../services/api";
 import Quiz from "./quiz";
 
 export default function LearningTopicPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const topic = getLearningTopicById(id);
-
+  const [topic, setTopic] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [today, setToday] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
   useEffect(() => {
-    if (!topic) {
-      navigate("/404"); // Or a dedicated not-found page
-    }
     setToday(new Date());
-  }, [topic, navigate]);
+    setLoading(true);
+    quizAPI.getById(id)
+      .then(res => {
+        if (res) {
+          setTopic({
+            ...res,
+            id: res.legacyId || res._id,
+            pointsToRead: res.pointsToRead || [],
+            availableDate: res.availableDate || '2024-01-01'
+          });
+        } else {
+          navigate("/learn");
+        }
+      })
+      .catch(() => navigate("/learn"))
+      .finally(() => setLoading(false));
+  }, [id, navigate]);
 
   if (!topic) return null;
 

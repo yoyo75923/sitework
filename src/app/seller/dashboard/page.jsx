@@ -33,6 +33,7 @@ import {
   Edit,
 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip"
+import { productAPI } from "../../../services/api"
 
 const productCategories = [
     {
@@ -103,64 +104,63 @@ export default function SellerDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false)
   const [showAddRefurbished, setShowAddRefurbished] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
-  const [products, setProducts] = useState([
-    {
-      id: "1",
-      name: "Eco-Friendly Bamboo Toothbrush Set",
-      price: 199,
-      status: "active",
-      views: 1247,
-      orders: 89,
-      revenue: 1156.11,
-      rating: 4.5,
-      reviewCount: 67,
-      image: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=300&h=300&fit=crop",
-      createdAt: "2024-01-15",
-      type: "new",
-      category: "beauty-health",
-    },
-    {
-      id: "2",
-      name: "Solar-Powered Phone Charger",
-      price: 749,
-      status: "active",
-      views: 892,
-      orders: 34,
-      revenue: 1563.66,
-      rating: 4.2,
-      reviewCount: 28,
-      image: "https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a?w=300&h=300&fit=crop",
-      createdAt: "2024-01-10",
-      type: "new",
-      category: "electronics",
-    },
-  ])
+  const [products, setProducts] = useState([])
+  const [refurbishedProducts, setRefurbishedProducts] = useState([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
-  const [refurbishedProducts, setRefurbishedProducts] = useState([
-    {
-      id: "ref-1",
-      name: "Refurbished MacBook Air 13-inch",
-      price: 79999,
-      status: "active",
-      views: 2341,
-      orders: 12,
-      revenue: 10799.88,
-      rating: 4.6,
-      reviewCount: 45,
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop",
-      createdAt: "2024-01-12",
-      type: "refurbished",
-      category: "electronics",
-      condition: "very-good",
-      warrantyMonths: 12,
-      originalAccessories: ["Power Adapter", "USB-C Cable", "Documentation"],
-      missingAccessories: [],
-      cosmeticCondition: "Minor scratches on the lid, screen is pristine",
-      functionalityTested: true,
-      originalPackaging: false,
-      returnDays: 90,
-    },
-  ])
+  useEffect(() => {
+    setIsLoadingProducts(true)
+    Promise.all([
+      productAPI.getAll({ type: 'new' }),
+      productAPI.getAll({ type: 'refurbished' })
+    ]).then(([newRes, refRes]) => {
+      if (newRes && newRes.products) {
+        setProducts(newRes.products.map(p => ({
+          ...p,
+          id: p.legacyId || p._id,
+          name: p.name || p.title,
+          price: p.price,
+          status: "active",
+          views: p.views || 120,
+          orders: p.orders || 15,
+          revenue: p.revenue || Math.round(p.price * 15),
+          rating: p.rating || 4.5,
+          reviewCount: p.reviewCount || 20,
+          image: p.image || (p.images && p.images[0]) || "",
+          createdAt: p.createdAt ? new Date(p.createdAt).toISOString().split('T')[0] : "2024-01-15",
+          type: "new",
+          category: p.category || "beauty-health"
+        })))
+      }
+      if (refRes && refRes.products) {
+        setRefurbishedProducts(refRes.products.map(p => ({
+          ...p,
+          id: p.legacyId || p._id,
+          name: p.name || p.title,
+          price: p.refurbishedPrice || p.price,
+          status: "active",
+          views: p.views || 340,
+          orders: p.orders || 12,
+          revenue: p.revenue || Math.round((p.refurbishedPrice || p.price) * 12),
+          rating: p.sellerRating || 4.6,
+          reviewCount: p.sellerSales || 45,
+          image: (p.images && p.images[0]) || p.image || "",
+          createdAt: p.createdAt ? new Date(p.createdAt).toISOString().split('T')[0] : "2024-01-12",
+          type: "refurbished",
+          category: p.category || "electronics",
+          condition: p.condition || "very-good",
+          warrantyMonths: p.warrantyMonths || 12,
+          originalAccessories: ["Power Adapter", "Cable", "Documentation"],
+          missingAccessories: [],
+          cosmeticCondition: p.cosmeticCondition || "Minor handling signs, fully tested",
+          functionalityTested: true,
+          originalPackaging: false,
+          returnDays: p.returnDays || 90
+        })))
+      }
+    }).catch(err => console.error("Error loading seller products from DB:", err))
+      .finally(() => setIsLoadingProducts(false))
+  }, [])
 
   const [productForm, setProductForm] = useState({
     category: "",
@@ -311,7 +311,7 @@ export default function SellerDashboard() {
       image:
         productForm.images.length > 0
           ? URL.createObjectURL(productForm.images[0])
-          : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",
+          : "",
       createdAt: new Date().toISOString().split("T")[0],
       type: "new",
       category: productForm.category,
@@ -354,7 +354,7 @@ export default function SellerDashboard() {
       image:
         refurbishedForm.images.length > 0
           ? URL.createObjectURL(refurbishedForm.images[0])
-          : "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=300&h=300&fit=crop",
+          : "",
       createdAt: new Date().toISOString().split("T")[0],
       type: "refurbished",
       category: refurbishedForm.category,

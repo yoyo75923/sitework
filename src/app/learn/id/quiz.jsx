@@ -1,21 +1,33 @@
-import { getLearningTopicById } from "../../../lib/quiz-data";
+import { quizAPI } from "../../../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function QuizPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const topic = getLearningTopicById(id);
-
+  const [topic, setTopic] = useState(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [score, setScore] = useState(null);
 
   useEffect(() => {
-    if (!topic) {
-      navigate("/404");
-    }
-  }, [topic, navigate]);
+    quizAPI.getById(id)
+      .then(res => {
+        if (res) {
+          setTopic({
+            ...res,
+            id: res.legacyId || res._id,
+            quiz: {
+              questions: res.questions || [],
+              points: res.points || 10
+            }
+          });
+        } else {
+          navigate("/learn");
+        }
+      })
+      .catch(() => navigate("/learn"));
+  }, [id, navigate]);
 
   if (!topic) return null;
 

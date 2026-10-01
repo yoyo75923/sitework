@@ -1,10 +1,6 @@
 import { useState } from "react";
 
-const placeholderImages = [
-  "https://media.istockphoto.com/id/516114395/photo/man-posing-with-blank-yellow-shirt.jpg?s=612x612&w=0&k=20&c=PGvwPMlCeDTlChNOqSuQBJCped6GSIuzpJrfrUMxs_s=",
-  "https://outoforder.in/wp-content/uploads/2020/03/Womens-Yellow-T-shirt-zoom-01-1.jpg",
-  "https://www.bushirt.in/cdn/shop/files/8_2bf84e70-ebbc-4464-8e50-33507feaaa39_1800x1800.jpg?v=1698990168",
-];
+
 
 export default function ProductDetails({
   product,
@@ -12,13 +8,12 @@ export default function ProductDetails({
   fullPage = false,
   recommendations,
 }) {
-  const images = [product.image, ...placeholderImages];
+  const images = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  // For demo: fake rating and stock
-  const rating = 4.5;
-  const reviewCount = 1234;
-  const inStock = true;
+  const rating = product.rating || 0;
+  const reviewCount = product.reviewCount || 0;
+  const inStock = product.inStock !== false;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

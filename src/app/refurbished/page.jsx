@@ -15,194 +15,42 @@ import {
   Search,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { productAPI } from "../../services/api";
 
 export default function RefurbishedPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [items, setItems] = useState([
-    {
-      id: "refurb-1",
-      name: "iPhone 13 Pro - Refurbished",
-      originalPrice: 79999,
-      price: 649.99 * 83,
-      savings: 350.0 * 83,
-      condition: "Excellent",
-      warranty: "1 Year Apple Warranty",
-      image:
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop",
-      brand: "Apple",
-      category: "smartphones",
-      inStock: true,
-      features: [
-        "128GB Storage",
-        "Face ID",
-        "Triple Camera System",
-        "5G Ready",
-      ],
-      seller: {
-        name: "TechHub Electronics",
-        isVerified: true,
-        rating: 4.8,
-        totalSales: 1247,
-      },
-    },
-    {
-      id: "refurb-2",
-      name: "MacBook Air M1 - Refurbished",
-      originalPrice: 79999,
-      price: 899.99 * 83,
-      savings: 400.0 * 83,
-      condition: "Very Good",
-      warranty: "90 Day Warranty",
-      image:
-        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=400&fit=crop",
-      brand: "Apple",
-      category: "laptops",
-      inStock: true,
-      features: ["M1 Chip", "8GB RAM", "256GB SSD", "13.3-inch Display"],
-      seller: {
-        name: "Premium Refurbs",
-        isVerified: true,
-        rating: 4.9,
-        totalSales: 892,
-      },
-    },
-    {
-      id: "refurb-3",
-      name: "Samsung Galaxy Watch 4 - Refurbished",
-      originalPrice: 79999,
-      price: 199.99 * 83,
-      savings: 130.0 * 83,
-      condition: "Good",
-      warranty: "6 Month Warranty",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsbr-E2kd878W2LtcFZQGHQgpC5ofshn63ZA&s",
-      brand: "Samsung",
-      category: "smartwatches",
-      inStock: true,
-      features: ["Health Monitoring", "GPS", "Water Resistant", "40mm"],
-      seller: {
-        name: "Shubham Electronics",
-        isVerified: false,
-        rating: 4.6,
-        totalSales: 654,
-      },
-    },
-    {
-      id: "refurb-4",
-      name: "Dell XPS 13 - Refurbished",
-      originalPrice: 79999,
-      price: 749.99 * 83,
-      savings: 450.0 * 83,
-      condition: "Very Good",
-      warranty: "1 Year Dell Warranty",
-      image:
-        "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=400&fit=crop",
-      brand: "Dell",
-      category: "laptops",
-      inStock: true,
-      features: ["Intel i7", "16GB RAM", "512GB SSD", "13.3-inch 4K"],
-      seller: {
-        name: "Elite Tech Solutions",
-        isVerified: true,
-        rating: 4.7,
-        totalSales: 423,
-      },
-    },
-    {
-      id: "refurb-5",
-      name: "iPad Pro 11-inch - Refurbished",
-      originalPrice: 79999,
-      price: 599.99 * 83,
-      savings: 300.0 * 83,
-      condition: "Excellent",
-      warranty: "1 Year Apple Warranty",
-      image:
-        "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=400&fit=crop",
-      brand: "Apple",
-      category: "tablets",
-      inStock: true,
-      features: [
-        "M1 Chip",
-        "128GB Storage",
-        "11-inch Liquid Retina",
-        "Apple Pencil Compatible",
-      ],
-      seller: {
-        name: "Digital Depot",
-        isVerified: true,
-        rating: 4.8,
-        totalSales: 1156,
-      },
-    },
-    {
-      id: "refurb-6",
-      name: "Sony WH-1000XM4 - Refurbished",
-      originalPrice: 79999,
-      price: 229.99 * 83,
-      savings: 120.0 * 83,
-      condition: "Very Good",
-      warranty: "6 Month Warranty",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-      brand: "Sony",
-      category: "headphones",
-      inStock: true,
-      features: [
-        "Noise Cancelling",
-        "30hr Battery",
-        "Touch Controls",
-        "Hi-Res Audio",
-      ],
-      seller: {
-        name: "Audio Masters",
-        isVerified: false,
-        rating: 4.4,
-        totalSales: 341,
-      },
-    },
-    {
-      id: "refurb-7",
-      name: "Google Pixel 7 - Refurbished",
-      originalPrice: 79999,
-      price: 449.99 * 83,
-      savings: 250.0 * 83,
-      condition: "Good",
-      warranty: "6 Month Warranty",
-      image:
-        "https://bsmedia.business-standard.com/_media/bs/img/article/2024-08/22/thumb/fitandfill/1200X900/1724305131-8675.jpg",
-      brand: "Google",
-      category: "smartphones",
-      inStock: true,
-      features: ["Google Tensor", "50MP Camera", "Android 13", "5G Ready"],
-      seller: {
-        name: "Mobile World",
-        isVerified: true,
-        rating: 4.5,
-        totalSales: 789,
-      },
-    },
-    {
-      id: "refurb-8",
-      name: "Microsoft Surface Pro 8 - Refurbished",
-      originalPrice: 79999,
-      price: 699.99 * 83,
-      savings: 400.0 * 83,
-      condition: "Excellent",
-      warranty: "1 Year Microsoft Warranty",
-      image:
-        "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400&h=400&fit=crop",
-      brand: "Microsoft",
-      category: "tablets",
-      inStock: true,
-      features: ["Intel i5", "8GB RAM", "128GB SSD", "13-inch PixelSense"],
-      seller: {
-        name: "Surface Specialists",
-        isVerified: true,
-        rating: 4.9,
-        totalSales: 567,
-      },
-    },
-  ]);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    productAPI.getAll({ type: 'refurbished' })
+      .then(res => {
+        if (res && res.products) {
+          const mapped = res.products.map(p => ({
+            ...p,
+            id: p.legacyId || p._id,
+            name: p.name || p.title,
+            price: p.refurbishedPrice || p.price,
+            originalPrice: p.originalPrice || Math.round((p.refurbishedPrice || p.price) * 1.3),
+            savings: p.savings || Math.max(0, (p.originalPrice || Math.round((p.refurbishedPrice || p.price) * 1.3)) - (p.refurbishedPrice || p.price)),
+            condition: p.condition || 'Excellent',
+            warranty: p.warranty || '1 Year Warranty',
+            image: (p.images && p.images.length > 0) ? p.images[0] : (p.image || ''),
+            brand: p.brand || 'Certified',
+            category: p.category || 'smartphones',
+            inStock: p.inStock !== false,
+            features: p.features || [],
+            seller: {
+              name: p.sellerName || 'Verified Refurbisher',
+              isVerified: true,
+              rating: p.sellerRating || 4.8,
+              totalSales: p.sellerSales || 150
+            }
+          }));
+          setItems(mapped);
+        }
+      })
+      .catch(err => console.error("Error fetching refurbished items from DB:", err));
+  }, []);
 
   const refurbishedCategories = [
     {
@@ -285,26 +133,8 @@ export default function RefurbishedPage() {
   };
 
   const getCategoryImage = (categoryId) => {
-    switch (categoryId) {
-      case "smartphones":
-        return "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop";
-      case "laptops":
-        return "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=300&fit=crop";
-      case "tablets":
-        return "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop";
-      case "smartwatches":
-        return "https://cdn.shopify.com/s/files/1/0997/6284/files/Watch_Colection_1024x1024.jpg?v=1654689385";
-      case "headphones":
-        return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop";
-      case "cameras":
-        return "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop";
-      case "gaming":
-        return "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop";
-      case "accessories":
-        return "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop";
-      default:
-        return "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop";
-    }
+    const item = items.find(i => i.category === categoryId);
+    return (item && (item.image || (item.images && item.images[0]))) || "";
   };
 
   const getConditionColor = (condition) => {

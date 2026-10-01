@@ -19,7 +19,7 @@ import {
   Target,
   Zap
 } from "lucide-react"
-import { getAllQuizzes, getQuizzesByCategory } from "../../lib/quiz-data"
+import { quizAPI } from "../../services/api"
 import { useQuiz } from "../../components/quiz-provider"
 import { useAuth } from "../../components/auth-provider"
 import { Link } from "react-router-dom"
@@ -50,7 +50,7 @@ const categoryColors = {
   'energy': 'bg-yellow-100 text-yellow-800 border-yellow-200'
 }
 
-const SECONDS_PER_SLIDE = 5;
+const SECONDS_PER_SLIDE = 15;
 
 export default function QuizPage() {
   const { user } = useAuth()
@@ -61,13 +61,29 @@ export default function QuizPage() {
   } = useQuiz()
   
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const allQuizzes = getAllQuizzes()
+  const [quizzesList, setQuizzesList] = useState([])
+
+  useEffect(() => {
+    quizAPI.getAll()
+      .then(res => {
+        if (res && res.length > 0) {
+          setQuizzesList(res.map(q => ({
+            ...q,
+            id: q.legacyId || q._id,
+            totalPoints: q.points || 10
+          })))
+        }
+      })
+      .catch(err => console.error("Error fetching quizzes from DB:", err))
+  }, [])
+
+  const allQuizzes = quizzesList
   
   const filteredQuizzes = selectedCategory === 'all' 
     ? allQuizzes 
-    : getQuizzesByCategory(selectedCategory)
+    : allQuizzes.filter(q => q.category === selectedCategory)
 
-  // Override quiz stats to match dashboard
+  // Quiz stats
   const totalGreenPointsEarned = 675
   const completedCount = 37
   const quizStreak = 11

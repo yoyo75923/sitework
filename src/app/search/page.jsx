@@ -4,44 +4,70 @@ import Header from "../../components/header"
 import ProductCard from "../../components/product-card"
 import { Button } from "../../components/ui/button"
 import { Search } from "lucide-react"
-import { allProducts } from "../../lib/products-data"
+import { productAPI } from "../../services/api"
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get("q") || ""
+  const [rawResults, setRawResults] = useState([])
   const [products, setProducts] = useState([])
   const [sortBy, setSortBy] = useState("relevance")
   const [priceRange, setPriceRange] = useState("all")
 
   useEffect(() => {
     if (query) {
-      let results = allProducts.filter(product => product.name.toLowerCase().includes(query.toLowerCase()))
-
-      // Apply sorting
-      if (sortBy === "price-low") {
-        results = results.sort((a, b) => a.price - b.price)
-      } else if (sortBy === "price-high") {
-        results = results.sort((a, b) => b.price - a.price)
-      } else if (sortBy === "rating") {
-        results = results.sort((a, b) => b.rating - a.rating)
-      } else if (sortBy === "green-rating") {
-        results = results.sort((a, b) => b.greenRating - a.greenRating)
-      }
-
-      // Apply price filter
-      if (priceRange === "under-25") {
-        results = results.filter((p) => p.price < 25)
-      } else if (priceRange === "25-50") {
-        results = results.filter((p) => p.price >= 25 && p.price <= 50)
-      } else if (priceRange === "50-100") {
-        results = results.filter((p) => p.price >= 50 && p.price <= 100)
-      } else if (priceRange === "over-100") {
-        results = results.filter((p) => p.price > 100)
-      }
-
-      setProducts(results)
+      productAPI.search(query)
+        .then(res => {
+          const prods = (res && res.products) ? res.products : (Array.isArray(res) ? res : []);
+          setRawResults(prods.map(p => ({
+            ...p,
+            id: p.legacyId || p._id,
+            name: p.name || p.title,
+            price: p.price || p.refurbishedPrice || 0,
+            originalPrice: p.originalPrice || Math.round((p.price || p.refurbishedPrice || 0) * 1.25),
+            rating: p.rating || 4.5,
+            reviewCount: p.reviewCount || 120,
+            greenRating: p.greenRating || 5,
+            certifications: p.certifications || 3,
+            image: p.image || (p.images && p.images[0]) || "",
+          })));
+        })
+        .catch(err => {
+          console.error("Search error:", err);
+          setRawResults([]);
+        });
+    } else {
+      setRawResults([]);
     }
-  }, [query, sortBy, priceRange])
+  }, [query])
+
+  useEffect(() => {
+    let results = [...rawResults]
+
+    // Apply sorting
+    if (sortBy === "price-low") {
+      results = results.sort((a, b) => a.price - b.price)
+    } else if (sortBy === "price-high") {
+      results = results.sort((a, b) => b.price - a.price)
+    } else if (sortBy === "rating") {
+      results = results.sort((a, b) => b.rating - a.rating)
+    } else if (sortBy === "green-rating") {
+      results = results.sort((a, b) => b.greenRating - a.greenRating)
+    }
+
+    // Apply price filter
+    if (priceRange === "under-1000" || priceRange === "under-25") {
+      results = results.filter((p) => p.price < 1000)
+    } else if (priceRange === "1000-5000" || priceRange === "25-50") {
+      results = results.filter((p) => p.price >= 1000 && p.price <= 5000)
+    } else if (priceRange === "5000-10000" || priceRange === "50-100") {
+      results = results.filter((p) => p.price >= 5000 && p.price <= 10000)
+    } else if (priceRange === "over-10000" || priceRange === "over-100") {
+      results = results.filter((p) => p.price > 10000)
+    }
+
+    setProducts(results)
+  }, [rawResults, sortBy, priceRange])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,10 +104,10 @@ export default function SearchPage() {
               className="border rounded px-3 py-2 text-sm"
             >
               <option value="all">All Prices</option>
-              <option value="under-25">Under $25</option>
-              <option value="25-50">$25 - $50</option>
-              <option value="50-100">$50 - $100</option>
-              <option value="over-100">Over $100</option>
+              <option value="under-1000">Under ₹1,000</option>
+              <option value="1000-5000">₹1,000 - ₹5,000</option>
+              <option value="5000-10000">₹5,000 - ₹10,000</option>
+              <option value="over-10000">Over ₹10,000</option>
             </select>
           </div>
         </div>

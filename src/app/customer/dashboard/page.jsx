@@ -1,4 +1,5 @@
 import { useAuth } from "../../../components/auth-provider"
+import { productAPI, marketplaceAPI } from "../../../services/api"
 import { useQuiz } from "../../../components/quiz-provider"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
@@ -43,27 +44,41 @@ export default function CustomerDashboard() {
   const router = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   const [showSellForm, setShowSellForm] = useState(false)
-  const [p2pItems, setP2pItems] = useState([
-    {
-      id: "p2p-1",
-      title: "Vintage Denim Jacket - Size M",
-      category: "clothing",
-      price: 299.0,
-      condition: "good",
-      description:
-        "Classic vintage denim jacket in great condition. Slight fading which adds to the vintage look. Perfect for casual wear.",
-      images: [
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Patna, Bihar",
-      views: 47,
-      likes: 8,
-      status: "active",
-      createdAt: "2024-01-20",
-    },
-  ])
+  const [p2pItems, setP2pItems] = useState([])
+  const [featuredProducts, setFeaturedProducts] = useState([])
+
+  useEffect(() => {
+    productAPI.getAll().then(res => {
+      if (res && res.products) {
+        setFeaturedProducts(res.products.slice(0, 4).map(p => ({
+          ...p,
+          id: p.legacyId || p._id,
+          prime: true,
+          image: p.image || (p.images && p.images[0]) || ""
+        })));
+      }
+    }).catch(err => console.error("Error loading products for customer dashboard:", err));
+
+    marketplaceAPI.getMyListings().then(res => {
+      if (res && res.listings && res.listings.length > 0) {
+        setP2pItems(res.listings.map(l => ({
+          ...l,
+          id: l.legacyId || l._id,
+          images: l.images || (l.image ? [l.image] : [])
+        })));
+      } else {
+        marketplaceAPI.getAll().then(allRes => {
+          if (allRes && allRes.listings) {
+            setP2pItems(allRes.listings.map(l => ({
+              ...l,
+              id: l.legacyId || l._id,
+              images: l.images || (l.image ? [l.image] : [])
+            })));
+          }
+        }).catch(() => {});
+      }
+    }).catch(err => console.error("Error loading customer marketplace items:", err));
+  }, []);
 
   const [sellForm, setSellForm] = useState({
     title: "",
@@ -73,7 +88,7 @@ export default function CustomerDashboard() {
     description: "",
     location: "",
     images: [],
-    receiptImage: null | null,
+    receiptImage: null,
     isBranded: false,
   })
 
@@ -81,7 +96,7 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     if (!isLoading && (!user || user.type !== "customer")) {
-      navigate("/login")
+      router("/login")
     }
   }, [user, isLoading, router])
 
@@ -119,55 +134,6 @@ export default function CustomerDashboard() {
     ],
   }
 
-  // Updated featured products with real images
-  const featuredProducts = [
-    {
-      id: "1",
-      name: "Organic Cotton T-Shirt - Sustainable Fashion",
-      price: 699,
-      originalPrice: 899,
-      rating: 4.5,
-      reviewCount: 1247,
-      greenRating: 5,
-      certifications: 3,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop",
-      prime: true,
-    },
-    {
-      id: "2",
-      name: "Bamboo Fiber Phone Case - Biodegradable",
-      price: Math.round(19.99 * 83),
-      rating: 4.2,
-      reviewCount: 856,
-      greenRating: 4,
-      certifications: 2,
-      image: "https://img.tvcmall.com/dynamic/uploads/details/740x740_660178279A-1.webp",
-      prime: true,
-    },
-    {
-      id: "3",
-      name: "Solar-Powered Bluetooth Speaker",
-      price: Math.round(89.99 * 83),
-    originalPrice: Math.round(119.99 * 83),
-      rating: 4.7,
-      reviewCount: 2341,
-      greenRating: 5,
-      certifications: 4,
-      image: "https://img.freepik.com/free-photo/electronic-device-table_417767-143.jpg?semt=ais_hybrid&w=740",
-    },
-    {
-      id: "4",
-      name: "Recycled Ocean Plastic Water Bottle",
-      price: Math.round(15.99 * 83),
-      rating: 4.3,
-      reviewCount: 1892,
-      greenRating: 5,
-      certifications: 2,
-      image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&h=300&fit=crop",
-      prime: true,
-    },
-  ]
-
   const p2pCategories = [
     { id: "clothing", name: "Clothing & Fashion", icon: "👕" },
     { id: "books", name: "Books & Media", icon: "📚" },
@@ -204,25 +170,42 @@ export default function CustomerDashboard() {
       return
     }
 
+    if (sellForm.images.length < 6) {
+      alert("Please upload at least 6 photos to help buyers see your item clearly and build trust")
+      return
+    }
+
+    if (sellForm.images.length > 8) {
+      alert("Please select maximum 8 images")
+      return
+    }
+
     const newItem = {
-      id: `p2p-${p2pItems.length + 1}`,
       title: sellForm.title,
       category: sellForm.category,
       price: parseFloat(sellForm.price),
-      condition: sellForm.condition, // should be a string like "new", "good", etc.
+      condition: sellForm.condition,
       description: sellForm.description,
       images: [
-        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&h=300&fit=crop"
+        ""
       ],
       hasReceipt: !!sellForm.receiptImage,
-      location: sellForm.location || "Seattle, WA",
+      location: sellForm.location || "Mumbai, Maharashtra",
       views: 0,
       likes: 0,
       status: "active",
       createdAt: new Date().toISOString().split("T")[0],
-    }
+    };
 
-    setP2pItems((prev) => [newItem, ...prev])
+    marketplaceAPI.create(newItem).then(created => {
+      const createdItem = created && created.listing ? {
+        ...created.listing,
+        id: created.listing.legacyId || created.listing._id
+      } : { ...newItem, id: `p2p-${Date.now()}` };
+      setP2pItems((prev) => [createdItem, ...prev]);
+    }).catch(() => {
+      setP2pItems((prev) => [{ ...newItem, id: `p2p-${Date.now()}` }, ...prev]);
+    });
     setShowSellForm(false)
     setSellForm({
       title: "",
@@ -993,18 +976,19 @@ export default function CustomerDashboard() {
                           </div>
 
                           <div>
-                            <Label htmlFor="images">Item Photos (6-8 recommended)</Label>
+                            <Label htmlFor="images">Item Photos (6-8 required) *</Label>
                             <div className="mt-1">
-                              <Input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+                              <Input type="file" accept="image/*" multiple onChange={handleImageUpload} required />
                               <p className="text-sm text-gray-500 mt-1">
-                                Upload 6-8 high-quality photos from different angles to help buyers see your item clearly.
+                                Upload 6-8 high-quality photos from different angles to help buyers see your item
+                                clearly.
                               </p>
                               {sellForm.images.length > 0 && (
                                 <div className="mt-2 space-y-1">
                                   <p className="text-sm font-medium">
                                     Uploaded: {sellForm.images.length}/8 images
                                     {sellForm.images.length < 6 && (
-                                      <span className="text-red-600 ml-2">(Minimum 6 recommended)</span>
+                                      <span className="text-red-600 ml-2">(Minimum 6 required)</span>
                                     )}
                                   </p>
                                   {sellForm.images.map((file, index) => (
@@ -1164,4 +1148,3 @@ export default function CustomerDashboard() {
     </div>
   )
 }
-

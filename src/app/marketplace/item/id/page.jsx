@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { marketplaceAPI } from "../../../../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../../components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
@@ -22,68 +23,41 @@ export default function MarketplaceItemPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
-  // Mock data - in real app, this would be fetched based on the ID
-  const p2pItems = {
-    "p2p-1": {
-      id: "p2p-1",
-      title: "Vintage Denim Jacket - Size M",
-      category: "clothing",
-      price: 799,
-      originalPrice: 1599,
-      condition: "good",
-      description:
-        "Classic vintage denim jacket in great condition. Slight fading which adds to the vintage look.",
-      detailedDescription:
-        "This beautiful vintage denim jacket is a timeless piece that never goes out of style. Made from high-quality denim with authentic vintage wash and fading that gives it character. The jacket features classic button closure, chest pockets, and side pockets. Perfect for layering and adds a cool, casual vibe to any outfit. Has been well-maintained and shows minimal signs of wear.",
-      images: [
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: false,
-      location: "Mumbai, Maharashtra",
-      views: 47,
-      likes: 8,
-      sellerName: "Aarav S.",
-      sellerRating: 4.8,
-      sellerSales: 23,
-      createdAt: "2024-01-20",
-      specifications: {
-        Size: "Medium",
-        Brand: "Vintage",
-        Material: "100% Cotton Denim",
-        Color: "Classic Blue",
-        Condition: "Good - Minor fading",
-        "Care Instructions": "Machine wash cold, hang dry",
-      },
-    },
-    "p2p-2": {
-      id: "p2p-2",
-      title: "Harry Potter Complete Book Set",
-      category: "books",
-      price: 45.0,
-      originalPrice: 0,
-      condition: "like-new",
-      description:
-        "Complete Harry Potter series in excellent condition. All 7 books included, barely read.",
-      detailedDescription:
-        "Complete Harry Potter series in excellent condition. All 7 books included, barely read.",
-      images: [
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop",
-      ],
-      hasReceipt: true,
-      location: "Delhi, Delhi",
-      views: 89,
-      likes: 15,
-      sellerName: "Priya R.",
-      sellerRating: 4.9,
-      sellerSales: 41,
-      createdAt: "2024-01-18",
-      specifications: {},
-    },
-    // ...repeat for all p2p-3, p2p-4, etc. from main page...
-  };
-  const item = p2pItems[params.id] || p2pItems["p2p-1"];
+  const [item, setItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    marketplaceAPI.getById(params.id)
+      .then(res => {
+        if (res) {
+          const mapped = {
+            ...res,
+            id: res.legacyId || res._id,
+            title: res.title,
+            price: res.price,
+            originalPrice: res.originalPrice || Math.round(res.price * 1.5),
+            category: res.category,
+            condition: res.condition || "good",
+            description: res.description,
+            detailedDescription: res.detailedDescription || res.description || "Pre-owned listing in verified condition from an active community member.",
+            images: res.images && res.images.length > 0 ? res.images : (res.image ? [res.image] : []),
+            hasReceipt: res.hasReceipt || false,
+            location: res.location || "Mumbai, Maharashtra",
+            views: res.views || 25,
+            likes: res.likes || 5,
+            sellerName: res.sellerName || "Marketplace Member",
+            sellerRating: res.sellerRating || 4.8,
+            sellerSales: res.sellerSales || 15,
+            createdAt: res.createdAt ? new Date(res.createdAt).toISOString().split('T')[0] : "2024-01-20",
+            specifications: res.specifications || {}
+          };
+          setItem(mapped);
+        }
+      })
+      .catch(err => console.error("Error fetching marketplace item from DB:", err))
+      .finally(() => setIsLoading(false));
+  }, [params.id]);
 
   const getConditionColor = (condition) => {
     switch (condition) {
@@ -112,6 +86,29 @@ export default function MarketplaceItemPage() {
       />
     ));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <p className="text-gray-500 text-lg">Loading marketplace item details from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-bold mb-4">Item Not Found</h2>
+          <Button onClick={() => navigate('/marketplace')}>Back to Marketplace</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
